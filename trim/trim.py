@@ -12,10 +12,11 @@ def trim(file_name, txt_name):
         for i in range(len(data_lines["タイトル"])):
             ymd = data_lines["公開年月日"][i]
             if ymd == "未定" or ymd == "" or int(ymd[:4]) >= 2003:
-                text = str(data_lines["タイトル"][i] + "\n")
+                text = data_lines["タイトル"][i] + "\n"
+                text = text.lower()
                 text = text.translate(ZEN2HAN)
                 text = re.sub(
-                    r'　| |・|「|」|【|】|『|』|<|>|〈|〉|\/|\[|\]|\.|,|_|-|−|ー|、|。|〜|～|~|\(\d+\)', "", text)
+                    r'　| |\・|\「|\」|\【|\】|\『|\』|\<|\>|\〈|\〉|\/|\[|\]|\.|\,|\_|\-|\−|\―|\‐|\‐|\‐|\{|\}|\ー|\、|\!|\。|〜|\～|\~|\(\d+\)', "", text)
                 f.write(text)
             elif int(ymd[:4]) < 2003:
                 pass
