@@ -14,7 +14,8 @@ def trim(file_name, txt_name):
             if ymd == "未定" or ymd == "" or int(ymd[:4]) >= 2003:
                 text = str(data_lines["タイトル"][i] + "\n")
                 text = text.translate(ZEN2HAN)
-                text = re.sub(r'　| |・|\.|,|-|ー|、|。|〜|～|~|\(\d+\)', "", text)
+                text = re.sub(
+                    r'　| |・|「|」|【|】|『|』|〈|〉|\/|\[|\]|\.|,|_|-|−|ー|、|。|〜|～|~|\(\d+\)', "", text)
                 f.write(text)
             elif int(ymd[:4]) < 2003:
                 pass
