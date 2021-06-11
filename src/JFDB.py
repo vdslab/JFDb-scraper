@@ -12,8 +12,8 @@ import jsonlines
 all_movie = []
 # for num in range(0, 6237//25):  # 6237は現在の映画の数。動的にしたいなら指定して持ってくる
 
-with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
-    for num in range(1, 251):
+with jsonlines.open('jfdb_4.jsonlines', mode='w') as writer:
+    for num in range(229, 251):
         print(num)
         url = f"https://jfdb.jp/search?KW=&PAGE={num}"
         res = requests.get(url)
@@ -26,24 +26,40 @@ with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
         for i in range(1, len(elems)+1, 2):  # 214pageの時に3桁になってバグるの直さなきゃ もともと50
             print("  ", i)
             movie = {
-                "id": "",
-                "タイトル": "",
-                "予告動画": "",
+                "id": None,
+                "タイトル": None,
+                "予告動画": None,
                 "image": [],
-                "公開年月日": "",
-                "上映時間": "",
+                "公開年月日": None,
+                "上映時間": None,
                 "カテゴリー": [],
-                "カラー": "",
-                "フォーマット": "",
+                "カラー": None,
+                "フォーマット": None,
                 "スタッフ": [],
                 "出演者": [],
                 "製作会社": [],
-                "説明": "",
-                "公式サイト": [],
+                "制作会社": [],
+                "配給会社（国内）": [],
+                "説明": None,
+                "公式サイト": None,
                 "映画祭・受賞歴": []
             }
+            # print(elems[i])
+            # print(elems[i].contents)
             # print(elems[i].contents[0][9:-9])
-            movie["タイトル"] = elems[i].contents[0][9:-9]  # 空白の取り除き
+            title_name = ""
+            for j in range(len(elems[i].contents[0].string.split(","))):
+                # print(elems[i].contents[0].string.split(","))
+                for k in range(len(elems[i].contents[0].string.split(",")[j].split())):
+                    title_name += elems[i].contents[0].string.split(",")[
+                        j].split()[k]
+
+                if k+1 != len(elems[i].contents[0].string.split(",")[j].split()):
+                    title_name += " "
+
+            movie["タイトル"] = title_name  # 空白の取り除き
+            # print(elems[i].contents[0])
+            # print(movie["タイトル"])
             movie["id"] = elems[i].attrs['href'][7:]  # id部分の抽出
             # ここは映画の詳細ページのurl
             Details_url = f"https://jfdb.jp{elems[i].attrs['href']}"
@@ -86,11 +102,67 @@ with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
             # 監督　プロデューサーなど
             person_elems_title = Details_elems.find_all(
                 "h2")
+            data2 = Details_elems.find_all(
+                "span")
+            # print(data2)
+            for i in range(len(data2)):
+                if len(data2[i].find_all("h2")) != 0:
+                    if data2[i].find_all("h2")[0].string[1:-1] == "制作会社":
+
+                        for j in range(len(Details_elems.find_all(
+                            "span")[i].next_sibling.next_sibling.string.split(","))
+                        ):
+                            ProductionCompany_list = ""
+                            for k in range(len(Details_elems.find_all(
+                                    "span")[i].next_sibling.next_sibling.string.split(",")[j].split())):
+
+                                ProductionCompany_list += Details_elems.find_all(
+                                    "span")[i].next_sibling.next_sibling.string.split(",")[j].split()[k]
+                                if k+1 != len(Details_elems.find_all(
+                                        "span")[i].next_sibling.next_sibling.string.split(",")[j].split()):
+                                    ProductionCompany_list += " "
+
+                            movie["制作会社"] .append(ProductionCompany_list)
+                            # print("SDFGHJKL+")
+                            # print(movie["制作会社"])
+                            # print(Details_elems.find_all(
+                            #     "span")[i].next_sibling.next_sibling.string.split(","))
+                            # print(Details_elems.find_all(
+                            #     "span")[i].next_sibling.next_sibling.string.split(",")[j].split())
+                    elif data2[i].find_all("h2")[0].string[1:-1] == "配給会社（国内）":
+
+                        for j in range(len(Details_elems.find_all(
+                            "span")[i].next_sibling.next_sibling.string.split(","))
+                        ):
+                            ProductionCompany_list = ""
+                            for k in range(len(Details_elems.find_all(
+                                    "span")[i].next_sibling.next_sibling.string.split(",")[j].split())):
+
+                                ProductionCompany_list += Details_elems.find_all(
+                                    "span")[i].next_sibling.next_sibling.string.split(",")[j].split()[k]
+                                if k+1 != len(Details_elems.find_all(
+                                        "span")[i].next_sibling.next_sibling.string.split(",")[j].split()):
+                                    ProductionCompany_list += " "
+
+                            movie["配給会社（国内）"] .append(ProductionCompany_list)
+                            # print("SDFGHJKL+")
+                            # print(movie["配給会社（国内）"])
+                            # print(Details_elems.find_all(
+                            #     "span")[i].next_sibling.next_sibling.string.split(","))
+                            # print(Details_elems.find_all(
+                            # "span")[i].next_sibling.next_sibling.string.split(",")[j].split())
+
+            # data2 = data2.find_all("h2"
+            # print(data2)
+
             # print("############################################################")
             for i in range(len(person_elems_title)):
                 title = person_elems_title[i].string[1:-1]
                 data = Details_elems.find_all(
                     "h2")[i].next_sibling.next_sibling
+                # data2 = Details_elems.find_all(
+                #     "span")
+                # print(data2)
                 # print(person_elems_title[i].string[1:-1])
                 # print(Details_elems.find_all(
                 #     "h2")[i].next_sibling.next_sibling)
@@ -102,7 +174,7 @@ with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
                         name_id = data.find_all("li")[index].find(
                             "a").attrs["href"][8:]
                         movie["スタッフ"].append(
-                            {"name": f"{name}", "name_id": f"{name_id}", "職種": "監督"})
+                            {"名前": f"{name}", "id": f"{name_id}", "職種": "監督"})
 
                 elif title == "プロデューサー":
                     for index in range(len(data.find_all("li"))):
@@ -156,12 +228,10 @@ with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
                     # .split(",").stripped_string
 
                 elif title == "解説":
-
                     # print(data.text.split()
                     all_explanation = ""
                     for index in range(len(data.text.split())):
                         all_explanation += data.text.split()[index]
-
                     movie["説明"] = all_explanation
 
                 elif title == "公式サイト":
@@ -173,6 +243,7 @@ with jsonlines.open('jfdb.jsonlines', mode='w') as writer:
                     #     "33333333333333333333333333333333       3333333333333333333333333333333333333333333333333333333333333333333")
                     movie["映画祭・受賞歴"] = [i.strip().replace("\u3000", " ")
                                         for i in data.text.splitlines() if i.strip() != ""]
+                    # print(data.text.splitlines())
                     # l = [i.strip() for i in data.text.splitlines()]
                     # print([i for i in l if i != ""])
                     # all_awards = ""
