@@ -6,7 +6,7 @@ data = None
 with open('trim/seedData.json') as f:
     data = json.load(f)
 
-with open('numa/numa.csv', mode='w') as f:
+with open('numa/numa.csv', mode='w', encoding='utf_8_sig') as f:
     writer = csv.writer(f)
     writer.writerow(['年', '俳優名'])
 
